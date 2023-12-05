@@ -1,0 +1,10 @@
+plots/
+*.csv
+.venv
+.idea
+random_test_tool.egg-info
+dist
+.DS_Store
+*/__pycache__/
+*/*/__pycache__/
+rtt-*
