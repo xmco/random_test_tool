@@ -27,7 +27,7 @@ It has minimal dependencies, all of which can be installed with the following co
 
 ### Install through package manager 
 
-Available here: https://pypi.org/project/random-test-tool/
+Available here: https://pypi.org/project/random_test_tool/
 
 ```Shell
 pip install random-test-tool
@@ -255,13 +255,13 @@ Feedback, contributions and ideas are very Welcome :slightly_smiling_face:!
 
 ### Need some feature or encountering a bug?
 
-Please open an [issue](https://github.com/xmco/random-test-tool/issues) and describe the encountered bug and or share any awesome ideas you may have related to the **Random Test Tool** project. 
+Please open an [issue](https://github.com/xmco/random_test_tool/issues) and describe the encountered bug and or share any awesome ideas you may have related to the **Random Test Tool** project. 
 
 
 ### Steps for submitting code
 
 
-1. [Fork](https://github.com/xmco/random-test-tool/fork) the current repository.
+1. [Fork](https://github.com/xmco/random_test_tool/fork) the current repository.
 
 2. Write your feature. Please follow-up the [PEP 8 coding style](https://peps.python.org/pep-0008/).
 

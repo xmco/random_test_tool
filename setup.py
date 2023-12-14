@@ -16,7 +16,7 @@ def process_readme_for_pypi():
 
 setup(
     name='random_test_tool',
-    version='1.0.3',
+    version='1.0.4',
     author='Antoine Rigoureau',
     author_email='antoine.rigoureau@xmco.fr',
     description='A simple python tool used form validating pseudo random generators output.',
