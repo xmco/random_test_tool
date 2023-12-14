@@ -1,7 +1,8 @@
 # Random Test Tool (RTT)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Current Version](https://img.shields.io/badge/version-v1.0.0-blue)]()
+[![Current Version](https://img.shields.io/badge/version-v1.0.3-blue)]()
+[![Python 3](https://img.shields.io/pypi/pyversions/sinabs?logo=python)](https://www.python.org/downloads/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/CERTXMCO?style=social)](https://twitter.com/CERTXMCO)
 [![XMCO](https://img.shields.io/badge/XMCO-021852)](https://www.xmco.fr)
 
@@ -24,6 +25,14 @@ This project was primarily motivated by the following objectives:
 
 It has minimal dependencies, all of which can be installed with the following commands below.
 
+### Install through package manager 
+
+Available here: https://pypi.org/project/random-test-tool/
+
+```Shell
+pip install random-test-tool
+```
+
 ### Install through repository
 
 ```Shell
@@ -31,13 +40,6 @@ git clone https://github.com/xmco/random-test-tool
 cd random-test-tool
 pip install -r requirements.txt
 ```
-
-### Install through package manager 
-
-> We are working on updating the project to propose a seamless and straightforward installation through `pip` package manager (https://pypi.org), stay tuned :slightly_smiling_face:
-
-
-
 
 
 
@@ -268,7 +270,6 @@ Please open an [issue](https://github.com/xmco/random-test-tool/issues) and desc
 
 ### High level Todolist
 
-- [ ] Publish the project on [pypi](https://pypi.org)
 - [ ] Implement, enhance and complete unit-tests (based on the standard)
 - [ ] Implement an export feature including results and figures (HTML and/or Markdown)
 - [ ] Integrate additional statistical tests (starting with NIST)

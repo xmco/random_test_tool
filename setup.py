@@ -1,8 +1,22 @@
 from setuptools import setup, find_packages
+import re
+
+
+def process_readme_for_pypi():
+    new_lines = []
+    with open('README.md') as f:
+        for line in f.readlines():
+            new_line = re.subn(":x:", "O", line)[0]
+            new_line = re.subn(":white_check_mark:", "XX", new_line)[0]
+            new_line = re.subn(":heavy_check_mark:", "X", new_line)[0]
+            new_line = re.subn(":[^ /-]*:", "", new_line)[0]
+            new_lines.append(new_line)
+    return "".join(new_lines)
+
 
 setup(
     name='random_test_tool',
-    version='1.0.2',
+    version='1.0.3',
     author='Antoine Rigoureau',
     author_email='antoine.rigoureau@xmco.fr',
     description='A simple python tool used form validating pseudo random generators output.',
@@ -29,7 +43,7 @@ setup(
         "tqdm==4.66.1",
     ],
     python_requires='>=3.9',
-    long_description=open('README.md').read(),
+    long_description=process_readme_for_pypi(),
     long_description_content_type="text/markdown",
     url="https://github.com/xmco/random_test_tool/"
 )
