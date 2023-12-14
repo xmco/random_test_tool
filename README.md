@@ -36,7 +36,7 @@ pip install random-test-tool
 ### Install through repository
 
 ```Shell
-git clone https://github.com/xmco/random-test-tool
+git clone https://github.com/xmco/random_test_tool
 cd random-test-tool
 pip install -r requirements.txt
 ```
