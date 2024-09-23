@@ -1,6 +1,8 @@
 import logging
 from enum import Enum
 
+from utils.exceptions import RTTException
+
 
 class DataType(Enum):
     """
@@ -26,6 +28,4 @@ class DataType(Enum):
         if data_code == "bytes":
             return DataType.BYTES
 
-        # Unknown code
-        logging.error("Unkown data type.")
-        raise ValueError
+        raise RTTException("Unkown data type.")

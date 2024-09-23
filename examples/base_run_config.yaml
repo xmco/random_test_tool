@@ -1,0 +1,103 @@
+# The two input options are exclusive, if both options are given, input_files will be used.
+input_files: ["sample_1.txt", "sample_2.txt"]
+input_dir: "/data"
+
+# output format: "terminal", "file", "graph" or "all"
+output: "terminal"
+
+# output directory
+output_dir: "."
+
+# Number of cores used
+n_cores: 1
+
+# Data type of the input: "int", "bits" or "bytes"
+data_type: "bits"
+
+# Separator used in the files with data_type "integer", any of: "\\n", " ", ",", ";"
+separator: "\\n"
+
+# Number of chunks, if not given each input file will be processed independently
+chunks: 20
+
+# List of tests with their specific configuration
+# Each entry must have a unique name
+test_plan:
+  chi2:
+    test_name: "chi2"
+    display_name: "Chi2"
+    params:
+      # For all tests p_value_limit and p_value_limit_strict can be override
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  binary_rank:
+    test_name: "binary_matrix"
+    display_name: "Binary Rank"
+    params:
+      # Depending on tests, specific options can also be override
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+      matrix_size: 32
+
+  block_chi2:
+    test_name: "block_chi2"
+    display_name: "Block Chi2"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+      block_size: 100
+
+  compression_test:
+    test_name: "compression"
+    display_name: "Compression"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  linear_complexity:
+    test_name: "linear_complexity"
+    display_name: "Linear Complexity"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+      block_size: 1000
+
+  run_of_ones:
+    test_name: "run_of_ones"
+    display_name: "Longest Run of Ones"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  run_test:
+    test_name: "run"
+    display_name: "Run"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  serial_test:
+    test_name: "serial"
+    display_name: "Serial"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  sign_test:
+    test_name: "sign"
+    display_name: "Sign"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+  spectral_test:
+    test_name: "spectral"
+    display_name: "Spectral"
+    params:
+      p_value_limit: 0.05
+      p_value_limit_strict: 0.01
+
+
+
+

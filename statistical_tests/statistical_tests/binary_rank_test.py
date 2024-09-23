@@ -25,20 +25,17 @@ def compute_binary_rank(rows):
     return rank
 
 
-@TestRegistry.register("binary_matrix", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("binary_matrix", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class BinaryMatrixTest(StatisticalTest):
     """
     Implementation of the binary matrix test in python.
     Checks the binary rank of matrices formed by substrings of the input compared to the theory.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+    def __init__(self, display_name="Binary Rank", p_value_limit=0.05, p_value_limit_strict=0.01, matrix_size=32):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
+        self.matrix_size = matrix_size
 
     def get_data_for_test(self, data):
         """
@@ -53,7 +50,7 @@ class BinaryMatrixTest(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Binary rank test")
+        return self.generate_test_report(self.display_name)
 
     @staticmethod
     def run_binary_test(bytestring, matrix_size):
@@ -100,12 +97,12 @@ class BinaryMatrixTest(StatisticalTest):
             p_val = math.exp(-chi / 2)
             return p_val
 
-    def run_test(self, data_generator, matrix_size=32):
+    def run_test(self, data_generator):
         """
         Launch binary rank test on the data.
         """
         logging.info("Launching binary matrix Test")
         self.get_data_for_test(data_generator)
-        p_val = self.run_binary_test(self.data, matrix_size)
+        p_val = self.run_binary_test(self.data, self.matrix_size)
         self.test_output = p_val
         logging.info("Binary matrix terminated")

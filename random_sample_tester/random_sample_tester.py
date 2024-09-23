@@ -6,6 +6,8 @@ from statistical_tests.statistical_test import TestRegistry
 from utils.data_type import DataType
 from bitstring import BitArray
 
+from utils.exceptions import RTTException
+
 
 @dataclass
 class DataSample:
@@ -30,16 +32,24 @@ class RandomSample:
         """
         return BitArray(bytes=in_bytes).bin[2:]
 
-    def get_data(self, path, data_code, separator):
+    def get_data(self, data, data_code, separator, chunks):
         """
         Retrieves the data to test, determines the type and creates a generator for this data
         :param separator: separator for INT data type
         :param data_code: data_type given in argument
-        :param path: input file paths
+        :param chunks whether the chunks option is activated
+        :param data: input file paths or DataSample object
         """
-        if not os.path.exists(path):
-            logging.error(f"The {path} file given as input does not exist. End of execution.")
-            raise FileNotFoundError
+        if chunks:
+            # Chunk option is activated, data is already in DataSample format
+            self.data = data
+            return
+
+        if not os.path.exists(data):
+            raise RTTException(f"The '{data}' file given as input does not exist.")
+
+        if os.path.isdir(data):
+            raise RTTException(f"The '{data}' file given as input is a directory. The input must only contain files")
 
         data_values = []
 
@@ -47,32 +57,38 @@ class RandomSample:
         data_type = DataType.get_data_type(data_code)
 
         if data_type == DataType.BYTES:
-            with open(path, 'rb') as file:
+            with open(data, 'rb') as file:
                 # Bytes must be converted into bitstring
                 data = file.read()
                 data_values = self.transform_bytes_to_bits(data)
                 data_type = DataType.BITSTRING
         else:
-            with open(path, 'r') as file:
+            with open(data, 'r') as file:
                 lines = file.read().splitlines()
 
                 # Processing file
                 if data_type == DataType.BITSTRING:
                     data_values = lines[0]
 
-                if data_type == DataType.INT:
-                    if separator == "\\n":
-                        for line in lines:
-                            data_values.append(int(line))
-                    else:
-                        data_values = list(map(int, lines[0].split(separator)))
+                try:
+                    if data_type == DataType.INT:
+                        if separator == "\\n":
+                            for line in lines:
+                                data_values.append(int(line))
+                        else:
+                            data_values = list(map(int, lines[0].split(separator)))
+                except (ValueError, UnicodeDecodeError):
+                    raise RTTException("Invalid data type encountered.")
 
         self.data = DataSample(data_values, data_type)
+
+        if len(self.data.data) < 10000:
+            logging.warning(f"Small data length, most tests will not work properly.")
 
 
 class RandomSampleTester(RandomSample):
     """
-    Class used to run statistical statistical_tests and generate the output report.
+    Class used to run statistical_tests and generate the output report.
     """
 
     def __init__(self):
@@ -89,27 +105,15 @@ class RandomSampleTester(RandomSample):
         for test in self.statistical_tests:
             self.test_results.append(test.generate_report())
 
-    def register_tests_for_run(self, test_names):
+    def register_tests_for_run(self, statistical_tests):
         """
         Retrieves and configures the statistical_tests to run for this run.
         """
-        test_dic = TestRegistry.get_available_tests()
-        data_type = self.data.data_type
-
-        if test_names == "all":
-            for test in test_dic.items():
-                if data_type in test[1][1]:
-                    logging.info(f"Adding {test[0]} to the run.")
-                    self.statistical_tests.append(test[1][0]())
-        else:
-            for test_name in test_names:
-                if test_name in list(test_dic.keys()):
-                    test = test_dic[test_name]
-                    if data_type in test[1]:
-                        logging.info(f"Adding {test_name} to the run.")
-                        self.statistical_tests.append(test[0]())
-                else:
-                    logging.warning(f"Test {test_name} does not exists.")
+        for test in statistical_tests:
+            if test.params:
+                self.statistical_tests.append(test.test_class(display_name=test.display_name, **test.params))
+            else:
+                self.statistical_tests.append(test.test_class())
 
     def run_tests(self, progress_queue):
         """
