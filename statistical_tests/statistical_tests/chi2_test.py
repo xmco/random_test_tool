@@ -6,19 +6,15 @@ import numpy as np
 from scipy.stats import chisquare
 
 
-@TestRegistry.register("chi2", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("chi2", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class Chi2Test(StatisticalTest):
     """
     Implementation of the chi 2 test verifying the uniformity of the distribution on the sample.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+    def __init__(self, display_name="Chi2", p_value_limit=0.05, p_value_limit_strict=0.01):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
 
     def get_data_for_test(self, data):
         """
@@ -37,7 +33,7 @@ class Chi2Test(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Chi-square goodness of fit")
+        return self.generate_test_report(self.display_name)
 
     def run_test(self, data_generator):
         """

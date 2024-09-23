@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from statistical_tests.statistical_tests.binary_rank_test import compute_binary_rank, BinaryMatrixTest
+from tests.utils import generate_periodic_sequence
 
 
 class TestRankComputation(TestCase):
@@ -51,11 +52,24 @@ class TestBinaryMatrix(TestCase):
     """
 
     def test_binary_matrix(self):
+        """
+        Test on e binary expansion, taken from
+        https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-22r1a.pdf
+        """
 
         with(open("../test_data/e_binary_extention", "r")) as f:
             chars = f.read()
             bm = BinaryMatrixTest()
             self.assertEqual(bm.run_binary_test(chars[:-1], 32), 0.5320686217466569)
+
+    def test_failure(self):
+        """
+        We generate a non random sequence, the test should fail.
+        """
+        chars = generate_periodic_sequence(100000, 64)
+        bm = BinaryMatrixTest()
+        self.assertGreater(0.01, bm.run_binary_test(chars, 32))
+
 
 
 

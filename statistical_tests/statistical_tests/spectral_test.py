@@ -8,21 +8,17 @@ from utils.data_type import DataType
 import numpy as np
 
 
-@TestRegistry.register("spectral", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("spectral", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class SpectralTest(StatisticalTest):
     """
     Implementation of spectral test used to detect periods in the sequence.
     Algorithm coming from: https://arxiv.org/pdf/1701.01960.pdf
     """
 
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
+    def __init__(self, display_name="Spectral", p_value_limit=0.05, p_value_limit_strict=0.01):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
         self.data_one_minus_one = []
-        self.test_output = None
-        self.report = None
 
     def get_data_for_test(self, data):
         """
@@ -46,7 +42,7 @@ class SpectralTest(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Spectral test")
+        return self.generate_test_report(self.display_name)
 
     @staticmethod
     def run_spectral_on_binary(one_minus_one, n_values):

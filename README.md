@@ -1,7 +1,7 @@
 # Random Test Tool (RTT)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Current Version](https://img.shields.io/badge/version-v1.0.3-blue)]()
+[![Current Version](https://img.shields.io/badge/version-v1.1.0-blue)]()
 [![Python 3](https://img.shields.io/pypi/pyversions/sinabs?logo=python)](https://www.python.org/downloads/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/CERTXMCO?style=social)](https://twitter.com/CERTXMCO)
 [![XMCO](https://img.shields.io/badge/XMCO-021852)](https://www.xmco.fr)
@@ -19,29 +19,7 @@ This project was primarily motivated by the following objectives:
 
 ## :building_construction: Installation
 
-### Compatibility
-
-*Random Test Tool* runs in Python 3! 
-
-It has minimal dependencies, all of which can be installed with the following commands below.
-
-### Install through package manager 
-
-Available here: https://pypi.org/project/random-test-tool/
-
-```Shell
-pip install random-test-tool
-```
-
-### Install through repository
-
-```Shell
-git clone https://github.com/xmco/random-test-tool
-cd random-test-tool
-pip install -r requirements.txt
-```
-
-
+For installation instructions, see: [INSTALL.md](INSTALL.md).
 
 ## :arrow_forward: Usage
 
@@ -51,14 +29,14 @@ pip install -r requirements.txt
 *Random Test Tool* can be executed using the following commands:
 
 ```Shell
-python random_test_tool.py -i <file_path>
-python random_test_tool.py -d <dir_path>
+random-test-tool -i <file_path>
+random-test-tool -d <dir_path>
 ```
 
 For example:
 
 ```Shell
-python random_test_tool.py -i random_generator_samples/python_random_integer/20230816-105301_RANDOM_NUMBERS.txt
+random-test-tool -i random_generator_samples/python_random_integer/20230816-105301_RANDOM_NUMBERS.txt
 ```
 
 *Random Test Tool* supports three input formats (within `20230816-105301_RANDOM_NUMBERS.txt`):
@@ -84,14 +62,22 @@ python random_test_tool.py -i random_generator_samples/python_random_integer/202
 *Random Test Tool* is capable of testing **multiple files in a row**:
 
 ```Shell
-python random_test_tool.py -i test_file_1.txt test_file_2.txt
+random-test-tool -i test_file_1.txt test_file_2.txt
 ```
 
 Additionally, it can test **all files within a directory**:
 
 ```Shell
-python random_test_tool.py -d test_files
+random-test-tool -d test_files
 ```
+
+By default, each file will be treated separately. However, the `-C` option can be used:
+
+```Shell
+random-test-tool -C 10
+```
+
+This option will split the whole input into the number of data chunks provided.
 
 ### Outputs 
 
@@ -99,12 +85,20 @@ By default, *Random Test Tool*  returns results **in the terminal**.
 
 You can use the `-o` option to specify **a return file** or **generate graphs**.
 
+### Configuration file
+
+A yaml configuration file can also be used (see [base_run_config.yaml](examples/base_run_config.yaml)).
+
+```Shell
+random-test-tool -c config_file.yaml
+```
+
 ### Other options 
 
 For a comprehensive understanding of available options, use the following command:
 
 ```Shell
-python random_test_tool.py -h 
+random-test-tool -h 
 
 Script testing the randomness of a serie of integers bits via statistical statistical_tests.
 
@@ -114,8 +108,10 @@ optional arguments:
                         List of files to test.
   -d INPUT_DIR, --input_dir INPUT_DIR
                         Input directory, statistical_tests will be launched on each file.
-  -o {terminal,file,graph,all}, --output {terminal,file,graph,all}
+  -o {terminal,csv,graph,html,all}, --output {terminal,csv,graph,html,all}
                         Output report options.
+  -O OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        Output directory.
   -j {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}, --n_cores {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31}
                         Number of processes used, 1 by default, maximum 31
   -t [STATISTICAL_TESTS ...], --test [STATISTICAL_TESTS ...]
@@ -126,10 +122,18 @@ optional arguments:
                         Separator used for integer files.
   -ll {ALL,DEBUG,INFO,WARN,ERROR,FATAL,OFF,TRACE}, --log_level {ALL,DEBUG,INFO,WARN,ERROR,FATAL,OFF,TRACE}
                         Log level (default: INFO).
+  -c CONFIG, --config CONFIG
+                        Configuration file of the run, if used will override other options.
+  -C CHUNKS, --chunks CHUNKS
+                        If this option is given, the inputs will bemerged and splited into n chunks then processed independently. 
 
 ```
 
 ![Usage](img/rtt_clip.mov_NG_DL%201.gif)
+
+### Usage examples
+
+For usage examples, check  [EXAMPLES.md](EXAMPLES.md)
 
 ## :school_satchel: Interpretation of the generated results  
 
@@ -149,7 +153,18 @@ To account for this behavior, the **recommended use of Random Test Tool** is:
 
 For example, if we run the tests on *100* samples and the `binary rank` test fails *12* times, as *12%* > *1%* (threshold of 0.01), we can consider that the source fails the test in question. 
 
-Conversely, if there are only *2* failures out of *100*, the test would be considered a success.
+Conversely, if there are only *1* failure out of *100*, the test would be considered a success.
+
+In RTT we follow the following default classification:
+
+| Label | p-value |                                Interpretation                                |
+|:----:| :-----: |:----------------------------------------------------------------------------:|
+|  OK  | p in [0.1; 0.99] |                               Test successful                                |
+| SUSPECT | p in [0.01; 0.1] U [0.9; 0.99] | Indicates the necessity to re-test to confirm or infirm the null hypothesis. |
+| KO | p < 0.01 and p > 0.99 | If ocurring in the conidtion described above, indicates test failure |
+
+The p-values limits of 0.1 and 0.01 are by default and can be modified using the yaml configuration file 
+see [base_run_config.yaml](examples/base_run_config.yaml).
 
 
 
@@ -168,34 +183,34 @@ While there are, of course, **other tools that implement statistical tests**:
 
 The table below **lists the implemented statistical tests by Tool**. 
 
-| Statistical test | Diehard | NIST Test Suite | Diharder  | TestU01 | Random Test Tool |
-| :--------: | :--------: |:--------: | :--------: | :--------: | :--------: |
-| Monobit (Chi2) | :white_check_mark: |:white_check_mark:  | :white_check_mark: |:white_check_mark:  | :white_check_mark:  |
-| Frequency in block | :white_check_mark: | :white_check_mark: | :white_check_mark: |:white_check_mark:  | |
-| Run Test | :white_check_mark:  |:white_check_mark:  |:white_check_mark:  |:white_check_mark: | :white_check_mark:  |
-| Longest run of Ones | | :white_check_mark: |:white_check_mark: | :white_check_mark: | |
-| Binary Rank | :white_check_mark: | :white_check_mark: |:white_check_mark:  |:white_check_mark:  | :white_check_mark:  |
-| DFT | |:white_check_mark:  |:white_check_mark:  |:white_check_mark:  | :white_check_mark: |
-| Non-overlapping template matching | :white_check_mark: | :white_check_mark: |:white_check_mark:  | :white_check_mark: | |
-| Overlapping template matching | :white_check_mark: | :white_check_mark: |:white_check_mark:  |:white_check_mark:  | |
-| Maurer test | |:white_check_mark:  |:white_check_mark:  |:white_check_mark:  | :white_check_mark: |
-| Lempel-Ziv | |:white_check_mark:  |:white_check_mark:  | :white_check_mark: | |
-| Linear Complexity | | :white_check_mark: |:white_check_mark:  | :white_check_mark: | :white_check_mark:  |
-| Serial | |:white_check_mark:  |:white_check_mark:  | :white_check_mark: |:white_check_mark:   |
-| Approximate entropy | |:white_check_mark:  | :white_check_mark: |:white_check_mark:  | |
-| Cumulative Sums | | :white_check_mark: | :white_check_mark:  |:white_check_mark:  | |
-| Random excursions | | :white_check_mark:  |:white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| Birthday Spacing | :white_check_mark: | |:white_check_mark:  | :white_check_mark: | |
-| 5-Permutation | :white_check_mark: | |:white_check_mark:  | :white_check_mark: | |
-| OPSO/OQSO |:white_check_mark:  | | :white_check_mark: | :white_check_mark:  | |
-| DNA |:white_check_mark:  | | :white_check_mark: |:white_check_mark:  | |
-| Parking Lot |:white_check_mark: | |:white_check_mark:  | :white_check_mark:  | |
-| Minimum Distance |:white_check_mark: | |:white_check_mark:  |:white_check_mark:  | |
-| 3-D Spheres |:white_check_mark: | |:white_check_mark:  |:white_check_mark:  | |
-| Craps |:white_check_mark: | | :white_check_mark: |:white_check_mark:  | |
-| Squeeze |:white_check_mark: | | :white_check_mark: |:white_check_mark:  | |
-| Other "Crush Tests"  (multiple tests) | | | |:white_check_mark: | |
-| Other "BigCrush" tests (multiple tests) | | | |:white_check_mark:  | |
+| Statistical test | Diehard | NIST Test Suite |     Dieharder      | TestU01 |  Random Test Tool  |
+| :--------: | :--------: |:--------: |:------------------:| :--------: |:------------------:|
+| Monobit (Chi2) | :white_check_mark: |:white_check_mark:  | :white_check_mark: |:white_check_mark:  | :white_check_mark: |
+| Frequency in block | :white_check_mark: | :white_check_mark: | :white_check_mark: |:white_check_mark:  | :white_check_mark: |
+| Run Test | :white_check_mark:  |:white_check_mark:  | :white_check_mark: |:white_check_mark: | :white_check_mark: |
+| Longest run of Ones | | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Binary Rank | :white_check_mark: | :white_check_mark: | :white_check_mark: |:white_check_mark:  | :white_check_mark: |
+| DFT | |:white_check_mark:  | :white_check_mark: |:white_check_mark:  | :white_check_mark: |
+| Non-overlapping template matching | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |                    |
+| Overlapping template matching | :white_check_mark: | :white_check_mark: | :white_check_mark: |:white_check_mark:  |                    |
+| Maurer test | |:white_check_mark:  | :white_check_mark: |:white_check_mark:  | :white_check_mark: |
+| Lempel-Ziv | |:white_check_mark:  | :white_check_mark: | :white_check_mark: |                    |
+| Linear Complexity | | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Serial | |:white_check_mark:  | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Approximate entropy | |:white_check_mark:  | :white_check_mark: |:white_check_mark:  |                    |
+| Cumulative Sums | | :white_check_mark: | :white_check_mark: |:white_check_mark:  |                    |
+| Random excursions | | :white_check_mark:  | :white_check_mark: | :white_check_mark:  | :white_check_mark: |
+| Birthday Spacing | :white_check_mark: | | :white_check_mark: | :white_check_mark: |                    |
+| 5-Permutation | :white_check_mark: | | :white_check_mark: | :white_check_mark: |                    |
+| OPSO/OQSO |:white_check_mark:  | | :white_check_mark: | :white_check_mark:  |                    |
+| DNA |:white_check_mark:  | | :white_check_mark: |:white_check_mark:  |                    |
+| Parking Lot |:white_check_mark: | | :white_check_mark: | :white_check_mark:  |                    |
+| Minimum Distance |:white_check_mark: | | :white_check_mark: |:white_check_mark:  |                    |
+| 3-D Spheres |:white_check_mark: | | :white_check_mark: |:white_check_mark:  |                    |
+| Craps |:white_check_mark: | | :white_check_mark: |:white_check_mark:  |                    |
+| Squeeze |:white_check_mark: | | :white_check_mark: |:white_check_mark:  |                    |
+| Other "Crush Tests"  (multiple tests) | | |                    |:white_check_mark: |                    |
+| Other "BigCrush" tests (multiple tests) | | |                    |:white_check_mark:  |                    |
 
 It is important to note that *TestU01* implements three test batteries: `SmallCrush`, `Crush`, and `BigCrush`. Due to the substantial number of tests within these batteries, not all of them are listed in the above table.
 
@@ -209,29 +224,29 @@ The table below provides a comparison of the previously discussed tools, focusin
 
 The aim of this comparison is to **help one user to identify the most relevant tool to pick** based on the **users' needs**.
 
-| Theme| Control | Diharder  | NIST Test Suite |  TestU01 | **Random Test Tool** |
-| :--------: | -------- |:--------: | :--------: | :--------: | :--------: |
-| **Ease of installation** | Via native operating system package manager | :white_check_mark:| :x: | :x:  | :x:|
-| " | Via non-native package manager| :x:  | :x:  |  :x: |  :white_check_mark: (pip) |
-| " | Via distributed executable| :x:   |:x:  | :x:   |  :x: |
+| Theme| Control |     Dieharder      | NIST Test Suite |  TestU01 | **Random Test Tool** |
+| :--------: | -------- |:------------------:| :--------: | :--------: | :--------: |
+| **Ease of installation** | Via native operating system package manager | :white_check_mark: | :x: | :x:  | :x:|
+| " | Via non-native package manager|        :x:         | :x:  |  :x: |  :white_check_mark: (pip) |
+| " | Via distributed executable|        :x:         |:x:  | :x:   |  :x: |
 | " | Via code compilation| :white_check_mark: | :white_check_mark: |:white_check_mark: |:white_check_mark:|
-| " | Simple configuration (no/few non-standard installation tasks)|:white_check_mark: | :white_check_mark: |  :x: |:white_check_mark:|
+| " | Simple configuration (no/few non-standard installation tasks)| :white_check_mark: | :white_check_mark: |  :x: |:white_check_mark:|
 | **Sharing / Transparency** | Open-source tool | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | **Documentation** | Quality of installation documentation| :white_check_mark: | :x: | :heavy_check_mark: | :white_check_mark: |
-| " | Quality of "quick start" / "out-of-the-box" usage documentation| :heavy_check_mark:  | :x: | :x: | :white_check_mark:  |
-| " | Documentation usability quality (ease of search and presentation of topics)|  :heavy_check_mark:  |  :x: |  :heavy_check_mark:  |  :heavy_check_mark:  |
-| " | Quality of mathematical documentation (precise description of statistical tests)| :heavy_check_mark:  | :white_check_mark:  |  :heavy_check_mark: | :x: |
-| **Ease of use** | Overall ease of use / intuitiveness | :heavy_check_mark:  | :white_check_mark: |:heavy_check_mark:  | :white_check_mark: |
+| " | Quality of "quick start" / "out-of-the-box" usage documentation| :heavy_check_mark: | :x: | :x: | :white_check_mark:  |
+| " | Documentation usability quality (ease of search and presentation of topics)| :heavy_check_mark: |  :x: |  :heavy_check_mark:  |  :heavy_check_mark:  |
+| " | Quality of mathematical documentation (precise description of statistical tests)| :heavy_check_mark: | :white_check_mark:  |  :heavy_check_mark: | :x: |
+| **Ease of use** | Overall ease of use / intuitiveness | :heavy_check_mark: | :white_check_mark: |:heavy_check_mark:  | :white_check_mark: |
 | " | Automatable (e.g., no interactivity required)| :white_check_mark: | :x: | :white_check_mark: |:white_check_mark:  |
 | **Inputs/Outputs** | Inputs: ASCII binary| :white_check_mark: | :white_check_mark: | :heavy_check_mark: | :white_check_mark: |
 | " | Inputs: Raw binary (files)| :white_check_mark: | :white_check_mark: | :heavy_check_mark: | :white_check_mark: |
-| " | Inputs: Floating numbers [0; 1]| :x: | :x: | :white_check_mark:  | :x: |
-| " | Inputs: Integers / Range of integers| :x: | :x: | :x: | :white_check_mark:  |
-| " | Outputs: Results within the terminal|:white_check_mark:  | :white_check_mark: |:white_check_mark: | :white_check_mark: |
+| " | Inputs: Floating numbers [0; 1]|        :x:         | :x: | :white_check_mark:  | :x: |
+| " | Inputs: Integers / Range of integers|        :x:         | :x: | :x: | :white_check_mark:  |
+| " | Outputs: Results within the terminal| :white_check_mark: | :white_check_mark: |:white_check_mark: | :white_check_mark: |
 | " | Outputs: Structured outputs| :white_check_mark: | :white_check_mark: | :heavy_check_mark: | :white_check_mark: |
-| " | Outputs: Interpreted statistical results| :white_check_mark:  | :x: | :white_check_mark: |  :white_check_mark:  |
+| " | Outputs: Interpreted statistical results| :white_check_mark: | :x: | :white_check_mark: |  :white_check_mark:  |
 | " | Outputs: Measurement and numerical results returned| :white_check_mark: | :white_check_mark: | :heavy_check_mark: | :white_check_mark: |
-| **Relevance of statistical tests** | Completeness of tests algorithms and precision of the configuration|:heavy_check_mark:| :heavy_check_mark:|:white_check_mark:  | :heavy_check_mark:|
+| **Relevance of statistical tests** | Completeness of tests algorithms and precision of the configuration| :heavy_check_mark: | :heavy_check_mark:|:white_check_mark:  | :heavy_check_mark:|
 
 
 #### Table caption 
@@ -247,32 +262,23 @@ Please note that the provided qualification represents **a subjective perspectiv
 
 > It's important to highlight that no performance comparison was conducted between the tools
 
-
-
 ## :busts_in_silhouette: Contribute to this project!
 
 Feedback, contributions and ideas are very Welcome :slightly_smiling_face:!
 
 ### Need some feature or encountering a bug?
 
-Please open an [issue](https://github.com/xmco/random-test-tool/issues) and describe the encountered bug and or share any awesome ideas you may have related to the **Random Test Tool** project. 
+Please open an [issue](https://github.com/xmco/random_test_tool/issues) and describe the encountered bug and or share any awesome ideas you may have related to the **Random Test Tool** project. 
 
 
 ### Steps for submitting code
 
 
-1. [Fork](https://github.com/xmco/random-test-tool/fork) the current repository.
+1. [Fork](https://github.com/xmco/random_test_tool/fork) the current repository.
 
 2. Write your feature. Please follow-up the [PEP 8 coding style](https://peps.python.org/pep-0008/).
 
-3. Send a GitHub Pull Request on the develop branch. Contributions will be merged after a code review. Branches will be moved to main when required. 
-
-
-### High level Todolist
-
-- [ ] Implement, enhance and complete unit-tests (based on the standard)
-- [ ] Implement an export feature including results and figures (HTML and/or Markdown)
-- [ ] Integrate additional statistical tests (starting with NIST)
+3. Send a GitHub Pull Request on the develop branch. Contributions will be merged after a code review. Branches will be moved to main when required.
 
 
 ##  :books: Related work
