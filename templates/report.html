@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Run Execution Report</title>
+  <style>
+
+  body {
+  font-family: helvetica, calibri, sans-serif;
+  }
+
+ table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  text-align: center;
+  vertical-align: middle;
+  padding: 5px;
+}
+
+th {
+ background-color: #EEE;
+}
+
+.tables_container {
+  display: table;
+  width: 750px;
+  table-layout: fixed;
+}
+
+.ok {
+  background-color: #CEEED0;
+  color: #286017;
+}
+
+.ko {
+  background-color: #F6C9CE;
+  color: #8F1B15;
+}
+
+.suspect {
+  background-color: #FCECA6;
+  color: #935A1E;
+}
+
+  </style>
+</head>
+
+<body>
+  <h1 style="text-align:center">Run Execution Report</h1>
+  <h2>Run Execution Context</h2>
+  <p>Execution Time: {{exec_time}}</p>
+  <p>
+    Processed files:<br>
+    {% for file in processed_files %}
+    <li>
+      - {{file}}
+    </li>
+    {% endfor %}
+  </p>
+
+  <h2>Run Results</h2>
+
+  <p>The following table and graphs summarize the test results for the different chunks of data.</p>
+  <p>For additional information about results analysis please check: <a href="https://github.com/xmco/random_test_tool/EXAMPLES.md">EXAMPLES.md</a> </p>
+
+  <table>
+    <tr>
+      <th>Test Name</th>
+      <th>OK Count</th>
+      <th>KO Count</th>
+      <th>KO 95% Interval</th>
+      <th>SUSPECT Count</th>
+      <th>SUSPECT 95% Interval</th>
+    </tr>
+    {% for test_summary in summary %}
+      <tr class={{test_summary.result_class}}>
+        <td>{{test_summary.test_name}}</td>
+        <td>{{test_summary.OK_count}}</td>
+        <td>{{test_summary.KO_count}}</td>
+        <td>{{test_summary.KO_interval}}</td>
+        <td>{{test_summary.SUSPECT_count}}</td>
+        <td>{{test_summary.SUSPECT_interval}}</td>
+      </tr>
+    {% endfor %}
+  </table>
+    <div>
+        {{ ScatterPlot }}
+    </div>
+    <div>
+        {{ BoxPlot }}
+    </div>
+  <h2>Run Results Details</h2>
+  {% for output in outputs %}
+    <div class="tables_container">
+    <table>
+      <tr>
+        <th>Test Name</th>
+        <th>Number of Samples</th>
+        <th>p-value</th>
+        <th>Criteria</th>
+        <div class="status_column">
+        <th>Status</th>
+          </div>
+      </tr>
+      {% for test_result in output %}
+      <tr class={{test_result.status.lower()}}>
+        <td>{{test_result.test_name}}</td>
+        <td>{{test_result.n_sample}}</td>
+        <td>{{'%0.3f' % test_result.p_value}}</td>
+        <td>{{test_result.criterias}}</td>
+        <td>
+          <div style="min-width:100px;">{{test_result.status}}</div>
+        </td>
+      </tr>
+    {% endfor %}
+   </table>
+        </div>
+  <br>
+  {% endfor %}
+</body>
+</html>

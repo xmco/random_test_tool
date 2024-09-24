@@ -7,18 +7,15 @@ from utils.data_type import DataType
 from statsmodels.stats.descriptivestats import sign_test
 
 
-@TestRegistry.register("sign", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("sign", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class SignTest(StatisticalTest):
     """
     Implementation of the sign test that checks the equal repartition of the data around the median.
     """
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+
+    def __init__(self, display_name="Sign", p_value_limit=0.05, p_value_limit_strict=0.01):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
 
     def get_data_for_test(self, data):
         """
@@ -35,7 +32,7 @@ class SignTest(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Sign test")
+        return self.generate_test_report(self.display_name)
 
     def run_test(self, data_generator):
         """

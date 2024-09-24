@@ -1,13 +1,9 @@
-import itertools
 import logging
 import math
 
-from scipy.fft import fft
-from scipy.special import erfc
-
 from statistical_tests.statistical_test import StatisticalTest, TestRegistry
 from utils.data_type import DataType
-import numpy as np
+from utils.exceptions import RTTException
 
 # [n, L, Q = 2 * 10^L, expectedValue, variance]
 # Data coming from https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-22r1a.pdf
@@ -26,19 +22,15 @@ COMPRESSION_DATA = [
 ]
 
 
-@TestRegistry.register("compression", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("compression", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class CompressionTest(StatisticalTest):
     """
     Compression test implementation.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+    def __init__(self, display_name="Compression", p_value_limit=0.05, p_value_limit_strict=0.01):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
 
     def get_data_for_test(self, data):
         """
@@ -51,13 +43,16 @@ class CompressionTest(StatisticalTest):
             binary_string = self.data
 
         self.n_values = len(binary_string)
+        if self.n_values < COMPRESSION_DATA[0][0]:
+            raise RTTException("Data length too small for compression test. Must be at least 387840."
+                               "This could be either your data is too small or can't be parsed properly.")
         self.data = binary_string
 
     def generate_report(self):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Compression test.")
+        return self.generate_test_report(self.display_name)
 
     def backtrack(self, key, L, table):
         """

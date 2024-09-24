@@ -8,13 +8,14 @@ class StatisticalTest(ABC):
     Abstract class for statistical test implementing asbtract methods get_data_for_test, run_test and generate_report.
     """
 
-    def __init__(self):
+    def __init__(self, p_value_limit=0.05, p_value_limit_strict=0.01):
         self.data = None
         # Default values
         self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
+        self.p_value_limit = p_value_limit
+        self.p_value_limit_strict = p_value_limit_strict
         self.test_output = None
+        self.report = None
 
     @abstractmethod
     def get_data_for_test(self, data_generator):
@@ -24,7 +25,7 @@ class StatisticalTest(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def run_test(self):
+    def run_test(self, data_generator):
         """
         Run the test on self.data.
         """
@@ -70,7 +71,7 @@ class StatisticalTest(ABC):
         :param test_name : test name.
         :return: Dictionary displaying test results.
         """
-        cond_value = math.fabs(self.test_output - 1)
+        cond_value = min(math.fabs(self.test_output - 1), self.test_output)
         if cond_value < self.p_value_limit:
             test_pass = "SUSPECT"
             if cond_value < self.p_value_limit_strict:
@@ -80,6 +81,7 @@ class StatisticalTest(ABC):
         report = {"test_name": test_name,
                   "n_sample": self.n_values,
                   "p_value": self.test_output,
+                  "p_value_limits": (self.p_value_limit_strict, self.p_value_limit),
                   "criterias": f"0 -KO- {self.p_value_limit_strict} -SUSPECT- {self.p_value_limit} -OK- "
                                f"{1- self.p_value_limit} -SUSPECT- {1-self.p_value_limit_strict} -KO- 1",
                   "status": test_pass}
@@ -116,3 +118,11 @@ class TestRegistry:
     @classmethod
     def get_available_tests(cls):
         return cls.available_tests
+
+    @classmethod
+    def get_test(cls, test_name):
+        try:
+            return cls.available_tests[test_name]
+        except KeyError:
+            logging.warning(f"Test {test_name} does not exists.")
+            return None

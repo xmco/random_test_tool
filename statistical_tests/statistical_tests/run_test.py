@@ -5,18 +5,15 @@ from utils.data_type import DataType
 from statsmodels.sandbox.stats.runs import runstest_1samp
 
 
-@TestRegistry.register("run", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("run", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class RunTest(StatisticalTest):
     """
     Implementation of the run test checking the repartition of increasing and decreasing sequences.
     """
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+
+    def __init__(self, display_name="Run", p_value_limit=0.05, p_value_limit_strict=0.01):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
 
     def get_data_for_test(self, data):
         """
@@ -33,7 +30,7 @@ class RunTest(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Run test")
+        return self.generate_test_report(self.display_name)
 
     def run_test(self, data_generator):
         """

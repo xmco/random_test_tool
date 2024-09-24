@@ -1,6 +1,6 @@
 plots/
 *.csv
-.venv
+.venv*
 .idea
 random_test_tool.egg-info
 dist

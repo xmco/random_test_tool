@@ -1,5 +1,5 @@
-import copy
 import logging
+import berlekamp_messey
 
 from scipy.special import gammaincc
 
@@ -8,55 +8,17 @@ from utils.data_type import DataType
 import numpy as np
 
 
-def berlekamp_massey_algorithm(block_data):
-    """
-    An implementation of the Berlekamp Massey Algorithm. Taken from Wikipedia [1]
-    [1] - https://en.wikipedia.org/wiki/Berlekamp-Massey_algorithm
-    The Berlekamp–Massey algorithm is an algorithm that will find the shortest linear feedback shift register (LFSR)
-    for a given binary output sequence. The algorithm will also find the minimal polynomial of a linearly recurrent
-    sequence in an arbitrary field. The field requirement means that the Berlekamp–Massey algorithm requires all
-    non-zero elements to have a multiplicative inverse.
-    :param block_data: bitstring
-    :return:
-    """
-    n = len(block_data)
-    c = np.zeros(n)
-    b = np.zeros(n)
-    c[0], b[0] = 1, 1
-    l_len, m = 0, 1
-    int_data = [int(el) for el in block_data]
-    for i in range(n):
-        v = int_data[(i - l_len):i]
-        v = v[::-1]
-        cc = c[1:l_len + 1]
-        d = (int_data[i] + np.dot(v, cc)) % 2
-        if d == 1:
-            temp = copy.copy(c)
-            p = np.zeros(n)
-            for j in range(0, l_len):
-                if b[j] == 1:
-                    p[j + i - m] = 1
-            c = (c + p) % 2
-            if l_len <= 0.5 * i:
-                l_len = i + 1 - l_len
-                m = i
-                b = temp
-    return l_len
-
-
-@TestRegistry.register("linear_complexity", [DataType.INT, DataType.BITSTRING])
+@TestRegistry.register("linear_complexity", [DataType.INT, DataType.BITSTRING, DataType.BYTES])
 class LinearComplexityTest(StatisticalTest):
     """
     Implementation of linear complexity test in python.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.n_values = 0
-        self.p_value_limit = 0.05
-        self.p_value_limit_strict = 0.01
-        self.test_output = None
-        self.report = None
+    def __init__(self, display_name="Linear Complexity", p_value_limit=0.05, p_value_limit_strict=0.01,
+                 block_size=1000):
+        super().__init__(p_value_limit=p_value_limit, p_value_limit_strict=p_value_limit_strict)
+        self.display_name = display_name
+        self.block_size = block_size
 
     def get_data_for_test(self, data):
         """
@@ -71,7 +33,7 @@ class LinearComplexityTest(StatisticalTest):
         """
         Generate a report with correct test_name.
         """
-        return self.generate_test_report("Linear complexity test")
+        return self.generate_test_report(self.display_name)
 
     @staticmethod
     def run_linear_complexity(data, block_size):
@@ -101,7 +63,8 @@ class LinearComplexityTest(StatisticalTest):
 
             complexities = []
             for block in blocks:
-                complexities.append(berlekamp_massey_algorithm(block))
+                s = list(map(int, block))
+                complexities.append(berlekamp_messey.berlekamp_messey(s, len(s)))
 
             t = ([(((-1) ** block_size) * (chunk - mean) + 2.0 / 9) for chunk in complexities])
             vg = np.histogram(t, bins=[-9999999999, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 9999999999])[0]
@@ -113,12 +76,12 @@ class LinearComplexityTest(StatisticalTest):
             p_val = gammaincc(dof / 2.0, chi_squared / 2.0)
             return p_val
 
-    def run_test(self, data_generator, block_size=1000):
+    def run_test(self, data_generator):
         """
         Launch linear complexity test on the data.
         """
         logging.info("Launching linear complexity Test")
         self.get_data_for_test(data_generator)
-        p_val = self.run_linear_complexity(self.data, block_size)
+        p_val = self.run_linear_complexity(self.data, self.block_size)
         self.test_output = p_val
         logging.info("Linear complexity terminated")
